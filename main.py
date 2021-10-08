@@ -13,6 +13,7 @@
 
 from common import *
 import pandas as pd
+from nltk.tokenize import sent_tokenize
 
 all_cols = ["Category", "Topic", "Incoming email subject", "Incoming email content"]
 df_final = pd.DataFrame()
@@ -27,3 +28,17 @@ for k, v in df.items():
 df_final = df_final.dropna(subset=["Incoming email content"])  # 81行
 print(df_final.head())
 print(df_final.shape)
+
+for row in df.iterrows():
+    Incoming_email_subject = row["Incoming email subject"]
+
+    acc_questions = []
+    sent_tokenize_list = sent_tokenize(Incoming_email_subject)
+    for i in range(len(sent_tokenize_list)):
+        s = sent_tokenize_list[i]
+        # 1. 提取问句
+        if s.strip()[-1] != "?":
+            continue
+        # 2. 剔除无效问句
+
+        # 3. 指代消歧
