@@ -13,7 +13,10 @@
 
 from common import *
 import pandas as pd
-from nltk.tokenize import sent_tokenize
+import spacy
+from nltk import sent_tokenize
+
+nlp = spacy.load('en_core_web_sm')  # 加载预训练模型
 
 all_cols = ["Category", "Topic", "Incoming email subject", "Incoming email content"]
 df_final = pd.DataFrame()
@@ -30,15 +33,35 @@ print(df_final.head())
 print(df_final.shape)
 
 for row in df.iterrows():
-    Incoming_email_subject = row["Incoming email subject"]
+    Incoming_email_content = row["Incoming email content"]
 
     acc_questions = []
-    sent_tokenize_list = sent_tokenize(Incoming_email_subject)
+    sent_tokenize_list = sent_tokenize(Incoming_email_content)
     for i in range(len(sent_tokenize_list)):
-        s = sent_tokenize_list[i]
+        s = sent_tokenize_list[i].strip()
         # 1. 提取问句
-        if s.strip()[-1] != "?":
+        if s[-1] != "?":
             continue
         # 2. 剔除无效问句
+        while " help me " in s:
+            s = s[s.find(' help me ') + 9:]
+        while " please " in s:
+            s = s[s.find(" please ") + 8:]
 
+        doc = nlp(s)
+        verbs = []
+        dobjs = []
+
+        for i_ in len(doc):
+            token = doc[i]
+            if token.pos_ == "VERB" and token.dep_ == "ROOT":
+                verbs.append(token.lemma_)
+            if token.pos_ == "NOUN" and token.dep_ == "dobj":
+                dobjs.append(token.lemma_)
+
+        if len(verbs) == 1 or len(dobjs) == 1:
+            if ("resolve" in verbs and ("issue" in dobjs or "problem" in dobjs)) or \
+                    ("answer" in verbs and "question" in dobjs):
+                continue
         # 3. 指代消歧
+
