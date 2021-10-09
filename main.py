@@ -1,22 +1,13 @@
 # -*- coding: utf-8 -*-
 
-"""
-1. 提取问句
-2. 指代消歧
-3. Can you please help me resolve this issue on my mobile app account?
-   What should I do?
-   could you please answer the following questions?
-   I'd also like to open an account with multiple purpose in it. Can you suggest any?
-4. 标题与正文相似度去重
-5. 对于help me, I need to，提取后面的并与标题计算语义相似度及关键词匹配度，去掉my等
-"""
-
 from common import *
 import pandas as pd
 import spacy
+import neuralcoref
 from nltk import sent_tokenize
 
 nlp = spacy.load('en_core_web_sm')  # 加载预训练模型
+neuralcoref.add_to_pipe(nlp)
 
 all_cols = ["Category", "Topic", "Incoming email subject", "Incoming email content"]
 df_final = pd.DataFrame()
@@ -32,8 +23,13 @@ df_final = df_final.dropna(subset=["Incoming email content"])  # 81行
 print(df_final.head())
 print(df_final.shape)
 
-for row in df.iterrows():
+all_qs = []
+
+for index, row in df_final.iterrows():
     Incoming_email_content = row["Incoming email content"]
+    if (not pd.isnull(row["Incoming email subject"])) and len(Incoming_email_content) < len(
+            row["Incoming email subject"]):
+        Incoming_email_content = row["Incoming email subject"]
 
     acc_questions = []
     sent_tokenize_list = sent_tokenize(Incoming_email_content)
@@ -52,8 +48,8 @@ for row in df.iterrows():
         verbs = []
         dobjs = []
 
-        for i_ in len(doc):
-            token = doc[i]
+        for i_ in range(len(doc)):
+            token = doc[i_]
             if token.pos_ == "VERB" and token.dep_ == "ROOT":
                 verbs.append(token.lemma_)
             if token.pos_ == "NOUN" and token.dep_ == "dobj":
@@ -64,4 +60,15 @@ for row in df.iterrows():
                     ("answer" in verbs and "question" in dobjs):
                 continue
         # 3. 指代消歧
+        acc_questions.append(str(i) + ". " + doc._.coref_resolved)
 
+    all_qs.append("\n".join(acc_questions))
+df_final["extract_questions"] = all_qs
+print(df_final)
+
+df_final['Incoming email content'] = df_final['Incoming email content'].apply(
+    lambda x: str(x).replace('\t', ' ').replace('\n', ' '))
+df_final['extract_questions'] = df_final['extract_questions'].apply(
+    lambda x: str(x).replace('\t', ' ').replace('\n', ' '))
+
+df_final.to_csv('data/email_question_result.txt', sep='\t', index=False)
