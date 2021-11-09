@@ -97,7 +97,10 @@ for index, row in df_final.iterrows():
     ranked_sentences = [(scores[i], s) for i, s in enumerate(sent_list)]
     ranked_sentences = fill_pre(sent_tokenize_list_ori, ranked_sentences, sent_indexes, bert_sent_vecs,
                                 need_pre_sents_vecs)
-    ranked_sentences = sorted(ranked_sentences, reverse=True)
+    non_ques_vecs = [(sent_tokenize_list_ori[i], get_bert_sent_vecs([sent_tokenize_list_ori[i]])[0]) for i in
+                     range(len(sent_tokenize_list_ori)) if i not in sent_indexes]
+    none_ques_ranked_sentences = fill_non_ques(non_ques_vecs, subject_bert_vec, Incoming_email_subject)
+    ranked_sentences = sorted(ranked_sentences + none_ques_ranked_sentences, reverse=True)
     all_qs.append(str(ranked_sentences))
 
 df_final["extract_questions"] = all_qs

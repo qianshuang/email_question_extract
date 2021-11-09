@@ -9,7 +9,7 @@ from common import *
 # nlp = spacy.load('en_core_web_sm')  # 加载预训练模型
 # neuralcoref.add_to_pipe(nlp)
 
-# from bert_common import *
+from bert_common import *
 
 # from graph_common import *
 
@@ -52,9 +52,7 @@ from common import *
 # for item in tr4s.get_key_sentences(num=3):
 #     print(item.index, item.weight, item.sentence)  # index是语句在文本中位置，weight是权重
 
-delete_sents = ["To whom it may concern"]
-Incoming_email_content = "To whom it may concern, Do you have Third Currency Accounts?  I'd like to open a Canadian Account. May I also know what other currencies can I open with you? Can I earn an interest with these accounts? What requirements do you need? Please respond at your earliest convenience. Thank you, Jes"
-Incoming_email_content = Incoming_email_content.lower()
-for ds in delete_sents:
-    Incoming_email_content = Incoming_email_content.replace(ds.lower(), "").strip()
-print(Incoming_email_content)
+s1 = "couldnt your reply be delivered to our house"
+s2 = "Looking forward to your reply"
+v = get_bert_sent_vecs([s1, s2])
+print(get_cos_similar(v[0], v[1]))
