@@ -68,13 +68,19 @@ def fill_pre(sent_tokenize_list_ori, ranked_sentences, sent_indexes, bert_sent_v
     return ranked_sentences_new
 
 
-def fill_non_ques(non_ques_vecs, subject_bert_vec, Incoming_email_subject):
+def fill_non_ques(non_ques_vecs, subject_bert_vec, Incoming_email_subject, declarative_words):
     ranked_sentences = []
     if Incoming_email_subject == "":
         return ranked_sentences
 
     for idx_vec in non_ques_vecs:
-        sim_scr = get_cos_similar(idx_vec[1], subject_bert_vec)
-        if sim_scr >= 0.8:
-            ranked_sentences.append((sim_scr, idx_vec[0]))
+        flag = False
+        for dw in declarative_words:
+            if dw in idx_vec[0]:
+                flag = True
+                break
+        if flag:
+            sim_scr = get_cos_similar(idx_vec[1], subject_bert_vec)
+            if sim_scr >= 0.8:
+                ranked_sentences.append((sim_scr, idx_vec[0]))
     return ranked_sentences

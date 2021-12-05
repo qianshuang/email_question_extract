@@ -22,6 +22,9 @@ delete_sents = read_file("resources/delete_sents.txt")
 need_pre_sents = read_file("resources/need_pre_sents.txt")
 need_pre_sents_vecs = get_bert_sent_vecs(need_pre_sents)
 
+# 加载陈述句诉求词
+declarative_words = read_file("resources/declarative_words.txt")
+
 all_cols = ["Category", "Topic", "Incoming email subject", "Incoming email content"]
 df_final = pd.DataFrame()
 
@@ -48,6 +51,8 @@ for index, row in df_final.iterrows():
 
     Incoming_email_content = "" if pd.isnull(row["Incoming email content"]) else row[
         "Incoming email content"].strip().lower()
+    Incoming_email_content = Incoming_email_content.replace("this", "it")
+    Incoming_email_content = Incoming_email_content.replace("that", "it")
     for ds in delete_sents:
         Incoming_email_content = Incoming_email_content.replace(ds.lower(), "").strip()
 
@@ -58,6 +63,8 @@ for index, row in df_final.iterrows():
     for ent in doc.ents:
         print(ent.text, ent.label_)  # Jes PERSON
         if ent.label_ == "PERSON":
+            Incoming_email_content = Incoming_email_content.replace(ent.text, "")
+        if ent.label_ == "ORG":
             Incoming_email_content = Incoming_email_content.replace(ent.text, "")
 
     sent_tokenize_list_ori = sent_tokenize(Incoming_email_content)
@@ -99,7 +106,8 @@ for index, row in df_final.iterrows():
                                 need_pre_sents_vecs)
     non_ques_vecs = [(sent_tokenize_list_ori[i], get_bert_sent_vecs([sent_tokenize_list_ori[i]])[0]) for i in
                      range(len(sent_tokenize_list_ori)) if i not in sent_indexes]
-    none_ques_ranked_sentences = fill_non_ques(non_ques_vecs, subject_bert_vec, Incoming_email_subject)
+    none_ques_ranked_sentences = fill_non_ques(non_ques_vecs, subject_bert_vec, Incoming_email_subject,
+                                               declarative_words)
     ranked_sentences = sorted(ranked_sentences + none_ques_ranked_sentences, reverse=True)
     all_qs.append(str(ranked_sentences))
 
