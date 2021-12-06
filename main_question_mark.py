@@ -49,12 +49,12 @@ for index, row in df_final.iterrows():
         Incoming_email_subject = Incoming_email_subject.replace(c, "")
     subject_bert_vec = get_bert_sent_vecs([Incoming_email_subject])[0]
 
-    Incoming_email_content = "" if pd.isnull(row["Incoming email content"]) else row[
-        "Incoming email content"].strip().lower()
+    Incoming_email_content = "" if pd.isnull(row["Incoming email content"]) else row["Incoming email content"].strip()
     Incoming_email_content = Incoming_email_content.replace("this", "it")
     Incoming_email_content = Incoming_email_content.replace("that", "it")
     for ds in delete_sents:
-        Incoming_email_content = Incoming_email_content.replace(ds.lower(), "").strip()
+        Incoming_email_content = Incoming_email_content.replace(ds, "")
+        Incoming_email_content = Incoming_email_content.replace(ds.lower(), "")
 
     doc = nlp(Incoming_email_content)
     # 1. 指代消歧
@@ -67,6 +67,7 @@ for index, row in df_final.iterrows():
         if ent.label_ == "ORG":
             Incoming_email_content = Incoming_email_content.replace(ent.text, "")
 
+    Incoming_email_content = Incoming_email_content.lower()
     sent_tokenize_list_ori = sent_tokenize(Incoming_email_content)
     # 只提取问句
     sent_indexes = [i for i in range(len(sent_tokenize_list_ori)) if sent_tokenize_list_ori[i].strip()[-1] == "?"]
