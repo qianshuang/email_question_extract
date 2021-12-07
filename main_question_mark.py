@@ -64,8 +64,8 @@ for index, row in df_final.iterrows():
         print(ent.text, ent.label_)  # Jes PERSON
         if ent.label_ == "PERSON":
             Incoming_email_content = Incoming_email_content.replace(ent.text, "")
-        if ent.label_ == "ORG":
-            Incoming_email_content = Incoming_email_content.replace(ent.text, "")
+        # if ent.label_ == "ORG":
+        #     Incoming_email_content = Incoming_email_content.replace(ent.text, "")
 
     Incoming_email_content = Incoming_email_content.lower()
     sent_tokenize_list_ori = sent_tokenize(Incoming_email_content)
