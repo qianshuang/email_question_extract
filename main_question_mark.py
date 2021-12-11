@@ -1,29 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from common import *
-from bert_common import *
+from config import *
 import pandas as pd
-import spacy
-import neuralcoref
 from nltk import sent_tokenize
 import string
-
-nlp = spacy.load('en_core_web_sm')  # 加载预训练模型
-neuralcoref.add_to_pipe(nlp)
-
-# 加载停用句
-stop_sents = read_file("resources/stop_sents.txt")
-stop_sents_vecs = get_bert_sent_vecs(stop_sents)
-
-# 加载无用客套语
-delete_sents = read_file("resources/delete_sents.txt")
-
-# 加载需前向查找语
-need_pre_sents = read_file("resources/need_pre_sents.txt")
-need_pre_sents_vecs = get_bert_sent_vecs(need_pre_sents)
-
-# 加载陈述句诉求词
-declarative_words = read_file("resources/declarative_words.txt")
 
 all_cols = ["Category", "Topic", "Incoming email subject", "Incoming email content"]
 df_final = pd.DataFrame()
@@ -52,6 +32,9 @@ for index, row in df_final.iterrows():
     Incoming_email_content = "" if pd.isnull(row["Incoming email content"]) else row["Incoming email content"]
     Incoming_email_content = Incoming_email_content.replace("this", "it")
     Incoming_email_content = Incoming_email_content.replace("that", "it")
+    Incoming_email_content = Incoming_email_content.replace("them", "it")
+    Incoming_email_content = Incoming_email_content.replace("these", "it")
+    Incoming_email_content = Incoming_email_content.replace("those", "it")
     for ds in delete_sents:
         Incoming_email_content = Incoming_email_content.replace(ds, "")
         Incoming_email_content = Incoming_email_content.replace(ds.lower(), "")

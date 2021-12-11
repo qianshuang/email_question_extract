@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
 
-# import spacy
-#
-# nlp = spacy.load('en_core_web_sm')  # 加载预训练模型
-#
-# Incoming_email_content = "Dear Sir or Madam,  May I confirm if there is a branch near my hometown? Signal Village Taguig? Thanks, Jes"
-# Incoming_email_content = Incoming_email_content.lower()
-# doc = nlp(Incoming_email_content)
-#
-# for ent in doc.ents:
-#     print(ent.text, ent.label_)  # Jes PERSON
-
 import string
+from nltk import sent_tokenize
 
-item = 'This is a demo.    '
-item = item.strip().strip(string.punctuation)
+import spacy
 
-print(item)
+nlp = spacy.load('en_core_web_sm')  # 加载预训练模型
+
+s = "Dear Sir or Madam, I just learned about your Bank on Facebook.Do you have a physical branch or are you branchless and just an online bank?"
+sent_tokenize_list_ori = sent_tokenize(s)
+print(sent_tokenize_list_ori)
+#
+# test_doc = nlp(s)
+# for sent in test_doc.sents:
+#     print(str(sent))

@@ -82,5 +82,12 @@ def fill_non_ques(non_ques_vecs, subject_bert_vec, Incoming_email_subject, decla
         if flag:
             sim_scr = get_cos_similar(idx_vec[1], subject_bert_vec)
             if sim_scr >= 0.8:
-                ranked_sentences.append((sim_scr, idx_vec[0]))
+                ranked_sentences.append((sim_scr, idx_vec[0], idx_vec[2]))
     return ranked_sentences
+
+
+def gen_res_data(ranked_sentences, sent_tokenize_list_in_email):
+    res_data = []
+    for score, s_intent, idx in ranked_sentences:
+        res_data.append({"score": score, "inquiry": s_intent, "original_sent": sent_tokenize_list_in_email[idx]})
+    return res_data
